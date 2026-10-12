@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Complaint | Smart Complaint Management System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">Home</a> &bull; <span>Submit Complaint</span>
+        </div>
+        <h1 class="page-title"><i class="fa-solid fa-file-circle-plus"></i> Submit a Civic Complaint</h1>
+        <p class="page-subtitle">Fill in the incident details below to notify municipal departments immediately.</p>
+    </div>
+</div>
+
+<div class="container page-content">
+    <div class="form-layout-grid">
+        <!-- Main Form Column -->
+        <div class="form-main-card">
+            <div class="card-header-styled">
+                <div class="header-icon-box">
+                    <i class="fa-solid fa-pencil"></i>
+                </div>
+                <div>
+                    <h2>Complaint Registration Form</h2>
+                    <p>All fields marked with an asterisk (<span class="required">*</span>) are mandatory.</p>
+                </div>
+            </div>
+
+            <form action="{{ url_for('submit_complaint') }}" method="POST" class="complaint-form" id="complaintForm">
+                <!-- Category Selection -->
+                <div class="form-group">
+                    <label for="category" class="form-label">
+                        <i class="fa-solid fa-layer-group"></i> Complaint Category <span class="required">*</span>
+                    </label>
+                    <select name="category" id="category" class="form-control" required>
+                        <option value="" disabled {% if not form_data or not form_data.category %}selected{% endif %}>
+                            -- Select Department / Category --
+                        </option>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}" {% if form_data and form_data.category == cat %}selected{% endif %}>
+                                {{ cat }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small class="form-hint">Choose the civic department most relevant to your grievance.</small>
+                </div>
+
+                <!-- Location / Address -->
+                <div class="form-group">
+                    <label for="location" class="form-label">
+                        <i class="fa-solid fa-location-dot"></i> Location / Incident Address <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        name="location" 
+                        id="location" 
+                        class="form-control" 
+                        placeholder="e.g. 42 Elm Street, Ward 9, Near Central Park" 
+                        value="{{ form_data.location if form_data else '' }}"
+                        required
+                    >
+                    <small class="form-hint">Provide landmark, street number, or ward info for fast dispatch.</small>
+                </div>
+
+                <!-- Priority Selection -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Priority Level <span class="required">*</span>
+                    </label>
+                    <div class="priority-selector-group">
+                        <label class="priority-radio-card priority-low">
+                            <input 
+                                type="radio" 
+                                name="priority" 
+                                value="Low" 
+                                {% if form_data and form_data.priority == 'Low' %}checked{% endif %}
+                            >
+                            <span class="radio-custom"></span>
+                            <div class="priority-text">
+                                <span class="priority-name"><i class="fa-solid fa-arrow-down"></i> Low</span>
+                                <span class="priority-sub">Routine upkeep</span>
+                            </div>
+                        </label>
+
+                        <label class="priority-radio-card priority-medium">
+                            <input 
+                                type="radio" 
+                                name="priority" 
+                                value="Medium" 
+                                {% if not form_data or not form_data.priority or form_data.priority == 'Medium' %}checked{% endif %}
+                            >
+                            <span class="radio-custom"></span>
+                            <div class="priority-text">
+                                <span class="priority-name"><i class="fa-solid fa-minus"></i> Medium</span>
+                                <span class="priority-sub">Standard resolution</span>
+                            </div>
+                        </label>
+
+                        <label class="priority-radio-card priority-high">
+                            <input 
+                                type="radio" 
+                                name="priority" 
+                                value="High" 
+                                {% if form_data and form_data.priority == 'High' %}checked{% endif %}
+                            >
+                            <span class="radio-custom"></span>
+                            <div class="priority-text">
+                                <span class="priority-name"><i class="fa-solid fa-arrow-up"></i> High</span>
+                                <span class="priority-sub">Urgent public risk</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="description" class="form-label">
+                        <i class="fa-solid fa-align-left"></i> Detailed Description <span class="required">*</span>
+                    </label>
+                    <textarea 
+                        name="description" 
+                        id="description" 
+                        rows="5" 
+                        class="form-control" 
+                        placeholder="Please describe the grievance in detail (duration, hazards, specific details)..."
+                        required
+                    >{{ form_data.description if form_data else '' }}</textarea>
+                    <small class="form-hint">Clear details assist engineers and field teams in preparing the right equipment.</small>
+                </div>
+
+                <!-- Submission Actions -->
+                <div class="form-actions-row">
+                    <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-complaint">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Grievance
+                    </button>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Sidebar Info Column -->
+        <div class="form-sidebar">
+            <div class="sidebar-card info-card">
+                <div class="sidebar-card-header">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <h3>Submission Guidelines</h3>
+                </div>
+                <ul class="guidelines-list">
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        <div>
+                            <strong>Accurate Location:</strong>
+                            <p>Mention nearby landmarks or crossroads to help inspection vehicles find the spot.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        <div>
+                            <strong>Immediate Tracking ID:</strong>
+                            <p>Once submitted, an instant Complaint ID is generated for real-time progress inquiry.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        <div>
+                            <strong>Priority Escalation:</strong>
+                            <p>Select High for active hazards like exposed live wires or severe pipeline flooding.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-card quick-track-card">
+                <div class="sidebar-card-header">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <h3>Already Submitted?</h3>
+                </div>
+                <p>Track your previous complaint anytime using the tracking portal.</p>
+                <a href="{{ url_for('track') }}" class="btn btn-secondary btn-block">
+                    Go to Track Status &rarr;
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+---
+# ==============================================================================
+# Ansible Playbook: Automated Deployment for Smart Complaint Management System
+# Target Host: Docker Engine Host / Lab Container
+# Module: community.docker.docker_container
+# ==============================================================================
+- name: Deploy Smart Complaint Management System Container
+  hosts: all
+  gather_facts: false
+  vars:
+    app_container_name: "complaint-management-ansible"
+    app_image_name: "complaint-management-ci"
+    app_host_port: 5002
+    app_container_port: 5000
+    docker_volume_name: "complaint_management_data"
+    docker_volume_mount: "/app/data"
+    target_container_state: "{{ container_state | default('started') }}"
+
+  tasks:
+    - name: Display deployment parameters
+      ansible.builtin.debug:
+        msg: >
+          Deploying {{ app_container_name }} using image {{ app_image_name }}.
+          Port Mapping: {{ app_host_port }}:{{ app_container_port }}.
+          Persistent Volume: {{ docker_volume_name }}:{{ docker_volume_mount }}.
+          Target State: {{ target_container_state }}.
+
+    - name: Ensure persistent Docker Volume exists
+      community.docker.docker_volume:
+        name: "{{ docker_volume_name }}"
+        state: present
+
+    - name: Deploy or update application container
+      community.docker.docker_container:
+        name: "{{ app_container_name }}"
+        image: "{{ app_image_name }}"
+        state: "{{ target_container_state }}"
+        restart_policy: unless-stopped
+        ports:
+          - "{{ app_host_port }}:{{ app_container_port }}"
+        volumes:
+          - "{{ docker_volume_name }}:{{ docker_volume_mount }}"
+        env:
+          ADMIN_USERNAME: "{{ admin_username | default('admin') }}"
+          ADMIN_PASSWORD: "{{ admin_password | default('admin123') }}"
+          SECRET_KEY: "{{ secret_key | default('devops-secret-key-2025') }}"
+        recreate: true
+
+    - name: Verify application container status
+      community.docker.docker_container_info:
+        name: "{{ app_container_name }}"
+      register: container_info
+
+    - name: Output container runtime details
+      ansible.builtin.debug:
+        msg: >
+          Container {{ app_container_name }} is {{ container_info.container.State.Status | default('unknown') }}.
+          Access the live portal at: http://localhost:{{ app_host_port }}

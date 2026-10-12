@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Complaint Management System{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons for professional UI accents -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar" id="main-nav">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="brand-logo" id="nav-brand-logo">
+                <i class="fa-solid fa-shield-halved brand-icon"></i>
+                <div class="brand-text">
+                    <span class="brand-title">Smart Complaint</span>
+                    <span class="brand-subtitle">Civic Resolution Portal</span>
+                </div>
+            </a>
+            <button class="nav-toggle" id="nav-toggle-btn" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="nav-menu">
+                <li>
+                    <a href="{{ url_for('index') }}" class="nav-item {% if request.endpoint == 'index' %}active{% endif %}" id="nav-home">
+                        <i class="fa-solid fa-house"></i> Home
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('report') }}" class="nav-item {% if request.endpoint == 'report' %}active{% endif %}" id="nav-report">
+                        <i class="fa-solid fa-file-circle-plus"></i> Submit Complaint
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url_for('track') }}" class="nav-item {% if request.endpoint == 'track' %}active{% endif %}" id="nav-track">
+                        <i class="fa-solid fa-magnifying-glass-location"></i> Track Status
+                    </a>
+                </li>
+                {% if session.get('is_admin') %}
+                    <li>
+                        <a href="{{ url_for('admin') }}" class="nav-item admin-badge-link {% if request.endpoint == 'admin' %}active{% endif %}" id="nav-admin">
+                            <i class="fa-solid fa-chart-line"></i> Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('admin_logout') }}" class="nav-item btn-logout-nav" id="nav-logout">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout ({{ session.get('admin_user') }})
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{{ url_for('admin_login') }}" class="nav-item btn-admin-nav {% if request.endpoint == 'admin_login' %}active{% endif %}" id="nav-login">
+                            <i class="fa-solid fa-lock"></i> Admin Portal
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Flash Notifications Container -->
+    <div class="flash-wrapper" id="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" role="alert">
+                        <div class="alert-content">
+                            {% if category == 'success' %}
+                                <i class="fa-solid fa-circle-check"></i>
+                            {% elif category == 'danger' %}
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle-info"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Close notification">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer" id="main-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-col brand-col">
+                    <div class="brand-logo footer-logo">
+                        <i class="fa-solid fa-shield-halved brand-icon"></i>
+                        <span class="brand-title">Smart Complaint Portal</span>
+                    </div>
+                    <p class="footer-tagline">
+                        A robust, citizen-centric public issue tracking and resolution system built for municipal efficiency and transparent civic operations.
+                    </p>
+                    <div class="devops-badge-strip">
+                        <span class="devops-pill"><i class="fa-brands fa-python"></i> Flask</span>
+                        <span class="devops-pill"><i class="fa-brands fa-docker"></i> Docker</span>
+                        <span class="devops-pill"><i class="fa-brands fa-jenkins"></i> Jenkins CI/CD</span>
+                        <span class="devops-pill"><i class="fa-solid fa-server"></i> Ansible</span>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="{{ url_for('index') }}"><i class="fa-solid fa-angle-right"></i> Home Overview</a></li>
+                        <li><a href="{{ url_for('report') }}"><i class="fa-solid fa-angle-right"></i> Submit New Issue</a></li>
+                        <li><a href="{{ url_for('track') }}"><i class="fa-solid fa-angle-right"></i> Track Grievance Status</a></li>
+                        <li><a href="{{ url_for('admin_login') }}"><i class="fa-solid fa-angle-right"></i> Administrative Portal</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">Service Categories</h4>
+                    <ul class="footer-links">
+                        <li><span><i class="fa-solid fa-faucet-drip"></i> Water Supply Network</span></li>
+                        <li><span><i class="fa-solid fa-bolt"></i> Electricity & Power Grids</span></li>
+                        <li><span><i class="fa-solid fa-trash-can"></i> Sanitation & Waste</span></li>
+                        <li><span><i class="fa-solid fa-road"></i> Roads & Public Infrastructure</span></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4 class="footer-heading">DevOps Architecture</h4>
+                    <p class="footer-arch-info">
+                        <strong>Storage:</strong> SQLite with Docker Volume (<code>complaint_management_data</code>)<br>
+                        <strong>CI/CD:</strong> Jenkins Pipeline (Build &rarr; Pytest &rarr; Ansible Deploy)<br>
+                        <strong>Container:</strong> <code>complaint-management-ansible</code> on Port 5002:5000
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Smart Complaint Management System &bull; DevOps Laboratory Demonstration Project</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Custom Script -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

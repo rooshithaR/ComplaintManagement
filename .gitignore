@@ -1,0 +1,8 @@
+complaints.db
+data/complaints.db
+__pycache__/
+*.pyc
+.venv/
+.env
+.pytest_cache/
+*.sqlite3

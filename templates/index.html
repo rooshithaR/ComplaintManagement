@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Smart Complaint Management System{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <span class="badge-tag"><i class="fa-solid fa-bolt-lightning"></i> Automated Civic Resolution System</span>
+            <h1 class="hero-title">Report Civic Issues, Track Fast Resolutions</h1>
+            <p class="hero-description">
+                Empowering residents to submit civic complaints regarding water supply, electricity, sanitation, roads, and maintenance. Monitor real-time status updates powered by a modern DevOps automated infrastructure.
+            </p>
+            <div class="hero-actions">
+                <a href="{{ url_for('report') }}" class="btn btn-primary btn-lg" id="btn-hero-submit">
+                    <i class="fa-solid fa-plus-circle"></i> Submit a Complaint
+                </a>
+                <a href="{{ url_for('track') }}" class="btn btn-secondary btn-lg" id="btn-hero-track">
+                    <i class="fa-solid fa-magnifying-glass"></i> Track Complaint Status
+                </a>
+            </div>
+            <div class="hero-highlights">
+                <div class="highlight-item">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Real-Time Updates</span>
+                </div>
+                <div class="highlight-item">
+                    <i class="fa-solid fa-shield-check"></i>
+                    <span>Persistent Docker Storage</span>
+                </div>
+                <div class="highlight-item">
+                    <i class="fa-solid fa-code-branch"></i>
+                    <span>Automated CI/CD Pipeline</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="system-status-card">
+                <div class="status-card-header">
+                    <div class="header-left">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Live Resolution Metrics</span>
+                    </div>
+                    <span class="live-dot"><span class="pulse"></span> Active</span>
+                </div>
+                <div class="quick-kpi-grid">
+                    <div class="kpi-mini-card total-kpi">
+                        <span class="kpi-number">{{ stats.total }}</span>
+                        <span class="kpi-label">Total Grievances</span>
+                    </div>
+                    <div class="kpi-mini-card submitted-kpi">
+                        <span class="kpi-number">{{ stats.submitted }}</span>
+                        <span class="kpi-label">Submitted</span>
+                    </div>
+                    <div class="kpi-mini-card progress-kpi">
+                        <span class="kpi-number">{{ stats.in_progress }}</span>
+                        <span class="kpi-label">In Progress</span>
+                    </div>
+                    <div class="kpi-mini-card resolved-kpi">
+                        <span class="kpi-number">{{ stats.resolved }}</span>
+                        <span class="kpi-label">Resolved</span>
+                    </div>
+                </div>
+                <div class="status-card-footer">
+                    <a href="{{ url_for('track') }}" class="card-footer-link">Look up a ticket by ID &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="section workflow-section">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-subtitle">Simplified Public Operations</span>
+            <h2 class="section-title">How The System Works</h2>
+            <p class="section-desc">From initial citizen reporting to administrative verification and final resolution.</p>
+        </div>
+        <div class="workflow-steps">
+            <div class="workflow-step-card">
+                <div class="step-icon-box step-1">
+                    <i class="fa-solid fa-file-pen"></i>
+                    <span class="step-num">01</span>
+                </div>
+                <h3>1. Submit Complaint</h3>
+                <p>Citizens select the service category, specify the street location, and describe the problem with priority.</p>
+            </div>
+            <div class="workflow-step-card">
+                <div class="step-icon-box step-2">
+                    <i class="fa-solid fa-ticket"></i>
+                    <span class="step-num">02</span>
+                </div>
+                <h3>2. ID Generated</h3>
+                <p>The Flask backend records the grievance into SQLite and generates an immediate, unique tracking ID.</p>
+            </div>
+            <div class="workflow-step-card">
+                <div class="step-icon-box step-3">
+                    <i class="fa-solid fa-user-gear"></i>
+                    <span class="step-num">03</span>
+                </div>
+                <h3>3. Admin Action</h3>
+                <p>Municipal administrators review details on the dashboard, assign resources, and advance the status to In Progress.</p>
+            </div>
+            <div class="workflow-step-card">
+                <div class="step-icon-box step-4">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span class="step-num">04</span>
+                </div>
+                <h3>4. Resolved & Closed</h3>
+                <p>Ground teams complete remediation. The ticket is marked Resolved, and citizens can verify the final outcome.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Supported Categories Section -->
+<section class="section categories-section">
+    <div class="container">
+        <div class="section-header text-center">
+            <span class="section-subtitle">Comprehensive Coverage</span>
+            <h2 class="section-title">Civic Complaint Categories</h2>
+            <p class="section-desc">Dedicated civic departments ready to address community concerns.</p>
+        </div>
+        <div class="category-grid">
+            <div class="category-card">
+                <div class="cat-icon"><i class="fa-solid fa-faucet-drip"></i></div>
+                <h3>Water Supply</h3>
+                <p>Low water pressure, pipeline leakages, contaminated supply, and valve malfunctions.</p>
+                <a href="{{ url_for('report') }}" class="cat-link">Report Water Issue &rarr;</a>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon"><i class="fa-solid fa-bolt"></i></div>
+                <h3>Electricity</h3>
+                <p>Streetlight outages, voltage fluctuations, transformer breakdowns, and exposed wiring.</p>
+                <a href="{{ url_for('report') }}" class="cat-link">Report Electrical Issue &rarr;</a>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon"><i class="fa-solid fa-trash-can"></i></div>
+                <h3>Sanitation</h3>
+                <p>Overflowing waste bins, missing garbage trucks, illegal dumping, and drainage clogging.</p>
+                <a href="{{ url_for('report') }}" class="cat-link">Report Sanitation Issue &rarr;</a>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon"><i class="fa-solid fa-road"></i></div>
+                <h3>Road & Infrastructure</h3>
+                <p>Dangerous potholes, broken pavements, damaged road barriers, and open manholes.</p>
+                <a href="{{ url_for('report') }}" class="cat-link">Report Road Issue &rarr;</a>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                <h3>Maintenance</h3>
+                <p>Public park equipment damage, bus shelter repairs, and civic property upkeep.</p>
+                <a href="{{ url_for('report') }}" class="cat-link">Report Maintenance &rarr;</a>
+            </div>
+            <div class="category-card">
+                <div class="cat-icon"><i class="fa-solid fa-ellipsis"></i></div>
+                <h3>Other Inquiries</h3>
+                <p>General public safety, noise disturbances, and miscellaneous municipal grievances.</p>
+                <a href="{{ url_for('report') }}" class="cat-link">Submit Custom Issue &rarr;</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- DevOps Architecture Banner -->
+<section class="section devops-callout-section">
+    <div class="container">
+        <div class="devops-banner-box">
+            <div class="devops-banner-text">
+                <span class="badge-tag badge-tag-alt"><i class="fa-solid fa-gears"></i> DevOps Pipeline</span>
+                <h2>Continuous Integration & Continuous Deployment</h2>
+                <p>
+                    Built with automated Pytest unit tests, Docker containerization, Jenkins 3-stage CI/CD pipeline, and Ansible community.docker deployment mounted to persistent Docker Volumes.
+                </p>
+                <div class="devops-pill-row">
+                    <span class="tech-pill">Git / GitHub</span>
+                    <span class="tech-pill">Pytest Automated Tests</span>
+                    <span class="tech-pill">Jenkins CI Pipeline</span>
+                    <span class="tech-pill">Ansible Automation</span>
+                    <span class="tech-pill">Docker Volume Persistence</span>
+                </div>
+            </div>
+            <div class="devops-banner-action">
+                <a href="{{ url_for('admin_login') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fa-solid fa-lock"></i> Access Admin Portal
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

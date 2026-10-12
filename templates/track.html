@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Status | Smart Complaint Management System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="{{ url_for('index') }}">Home</a> &bull; <span>Track Grievance</span>
+        </div>
+        <h1 class="page-title"><i class="fa-solid fa-magnifying-glass-location"></i> Track Grievance Status</h1>
+        <p class="page-subtitle">Search with your unique Complaint ID to view live progress, updates, and department notes.</p>
+    </div>
+</div>
+
+<div class="container page-content">
+    <!-- Lookup Search Bar -->
+    <div class="track-search-wrapper">
+        <form action="{{ url_for('track') }}" method="GET" class="track-search-form" id="trackForm">
+            <div class="search-input-group">
+                <i class="fa-solid fa-hashtag search-icon"></i>
+                <input 
+                    type="number" 
+                    name="complaint_id" 
+                    id="complaint_id" 
+                    class="search-input" 
+                    placeholder="Enter Complaint ID (e.g. 1, 2, 10)..." 
+                    value="{{ query_id or '' }}" 
+                    required 
+                    min="1"
+                >
+                <button type="submit" class="btn btn-primary btn-search" id="btn-track-submit">
+                    <i class="fa-solid fa-magnifying-glass"></i> Track Status
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    {% if complaint %}
+        <div class="ticket-card" id="ticket-result">
+            <div class="ticket-header">
+                <div class="ticket-id-badge">
+                    <span class="label">Complaint ID</span>
+                    <span class="id-number">#{{ complaint.id }}</span>
+                </div>
+                <div class="ticket-header-meta">
+                    <span class="priority-badge priority-{{ complaint.priority|lower }}">
+                        <i class="fa-solid fa-flag"></i> {{ complaint.priority }} Priority
+                    </span>
+                    <span class="status-badge status-{{ complaint.status|lower|replace(' ', '-') }}">
+                        <span class="status-dot"></span> {{ complaint.status }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Stepped Timeline Progress Tracker -->
+            <div class="progress-timeline-wrapper">
+                <h3 class="timeline-title"><i class="fa-solid fa-route"></i> Resolution Timeline</h3>
+                
+                {# Determine step index: 0=Submitted, 1=In Progress, 2=Resolved, 3=Closed #}
+                {% set status_order = ['Submitted', 'In Progress', 'Resolved', 'Closed'] %}
+                {% set current_idx = 0 %}
+                {% if complaint.status == 'In Progress' %}
+                    {% set current_idx = 1 %}
+                {% elif complaint.status == 'Resolved' %}
+                    {% set current_idx = 2 %}
+                {% elif complaint.status == 'Closed' %}
+                    {% set current_idx = 3 %}
+                {% endif %}
+
+                <div class="timeline-steps">
+                    <!-- Step 1: Submitted -->
+                    <div class="timeline-step {% if current_idx >= 0 %}completed{% endif %} {% if current_idx == 0 %}active{% endif %}">
+                        <div class="step-circle">
+                            {% if current_idx > 0 %}
+                                <i class="fa-solid fa-check"></i>
+                            {% else %}
+                                1
+                            {% endif %}
+                        </div>
+                        <div class="step-label">Submitted</div>
+                        <div class="step-desc">Grievance registered</div>
+                    </div>
+
+                    <div class="timeline-connector {% if current_idx >= 1 %}completed{% endif %}"></div>
+
+                    <!-- Step 2: In Progress -->
+                    <div class="timeline-step {% if current_idx >= 1 %}completed{% endif %} {% if current_idx == 1 %}active{% endif %}">
+                        <div class="step-circle">
+                            {% if current_idx > 1 %}
+                                <i class="fa-solid fa-check"></i>
+                            {% else %}
+                                2
+                            {% endif %}
+                        </div>
+                        <div class="step-label">In Progress</div>
+                        <div class="step-desc">Field team assigned</div>
+                    </div>
+
+                    <div class="timeline-connector {% if current_idx >= 2 %}completed{% endif %}"></div>
+
+                    <!-- Step 3: Resolved -->
+                    <div class="timeline-step {% if current_idx >= 2 %}completed{% endif %} {% if current_idx == 2 %}active{% endif %}">
+                        <div class="step-circle">
+                            {% if current_idx > 2 %}
+                                <i class="fa-solid fa-check"></i>
+                            {% else %}
+                                3
+                            {% endif %}
+                        </div>
+                        <div class="step-label">Resolved</div>
+                        <div class="step-desc">Fix verified on-site</div>
+                    </div>
+
+                    <div class="timeline-connector {% if current_idx >= 3 %}completed{% endif %}"></div>
+
+                    <!-- Step 4: Closed -->
+                    <div class="timeline-step {% if current_idx >= 3 %}completed{% endif %} {% if current_idx == 3 %}active{% endif %}">
+                        <div class="step-circle">
+                            {% if current_idx == 3 %}
+                                <i class="fa-solid fa-check"></i>
+                            {% else %}
+                                4
+                            {% endif %}
+                        </div>
+                        <div class="step-label">Closed</div>
+                        <div class="step-desc">Ticket finalized</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Complaint Data Grid -->
+            <div class="ticket-body">
+                <div class="ticket-grid">
+                    <div class="detail-box">
+                        <span class="detail-label"><i class="fa-solid fa-layer-group"></i> Department / Category</span>
+                        <span class="detail-value highlight">{{ complaint.category }}</span>
+                    </div>
+                    <div class="detail-box">
+                        <span class="detail-label"><i class="fa-solid fa-calendar-days"></i> Registered Timestamp</span>
+                        <span class="detail-value">{{ complaint.created_at }}</span>
+                    </div>
+                    <div class="detail-box full-width">
+                        <span class="detail-label"><i class="fa-solid fa-location-dot"></i> Incident Location</span>
+                        <span class="detail-value">{{ complaint.location }}</span>
+                    </div>
+                    <div class="detail-box full-width">
+                        <span class="detail-label"><i class="fa-solid fa-comment-dots"></i> Detailed Description</span>
+                        <div class="detail-text-box">
+                            <p>{{ complaint.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-footer">
+                <div class="ticket-footer-left">
+                    <i class="fa-solid fa-database"></i> Stored in persistent Docker Volume database (<code>data/complaints.db</code>)
+                </div>
+                <div class="ticket-footer-right">
+                    <a href="{{ url_for('report') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i> Submit Another Issue
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% elif searched %}
+        <div class="not-found-card">
+            <div class="not-found-icon">
+                <i class="fa-solid fa-ticket-simple"></i>
+            </div>
+            <h3>No Complaint Found</h3>
+            <p>We could not find any active complaint with ID <strong>#{{ query_id }}</strong>.</p>
+            <p class="sub-hint">Please verify the ID from your submission receipt or register a new grievance.</p>
+            <div class="not-found-actions">
+                <a href="{{ url_for('report') }}" class="btn btn-primary">
+                    <i class="fa-solid fa-plus-circle"></i> Submit New Complaint
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <!-- Search Prompt Intro -->
+        <div class="track-prompt-grid">
+            <div class="prompt-card">
+                <div class="prompt-icon"><i class="fa-solid fa-receipt"></i></div>
+                <h3>Have your Ticket ID ready</h3>
+                <p>Enter the numeric Complaint ID you received upon completing the submission form.</p>
+            </div>
+            <div class="prompt-card">
+                <div class="prompt-icon"><i class="fa-solid fa-bell"></i></div>
+                <h3>Live Status Updates</h3>
+                <p>Track as your complaint transitions from <em>Submitted</em> &rarr; <em>In Progress</em> &rarr; <em>Resolved</em> &rarr; <em>Closed</em>.</p>
+            </div>
+            <div class="prompt-card">
+                <div class="prompt-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>Transparent Civic Accountability</h3>
+                <p>All timestamps and department actions are recorded directly in the municipal database.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

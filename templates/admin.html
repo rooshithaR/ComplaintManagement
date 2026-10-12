@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard | Smart Complaint Management System{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper">
+    <div class="admin-top-bar">
+        <div class="container admin-bar-container">
+            <div class="admin-title-area">
+                <h1><i class="fa-solid fa-gauge-high"></i> Administrative Operations Dashboard</h1>
+                <p>Monitor grievances, dispatch municipal teams, and update lifecycle resolution states.</p>
+            </div>
+            <div class="admin-user-info">
+                <span class="admin-chip">
+                    <i class="fa-solid fa-user-check"></i> Connected as: <strong>{{ session.get('admin_user', 'Administrator') }}</strong>
+                </span>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-danger btn-sm">
+                    <i class="fa-solid fa-power-off"></i> Logout
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container page-content">
+        <!-- Summary Metric KPI Cards -->
+        <div class="admin-kpi-grid">
+            <div class="admin-kpi-card kpi-total">
+                <div class="kpi-icon-wrapper">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="kpi-total-val">{{ stats.total }}</span>
+                    <span class="kpi-title">Total Complaints</span>
+                </div>
+            </div>
+
+            <div class="admin-kpi-card kpi-submitted">
+                <div class="kpi-icon-wrapper">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="kpi-submitted-val">{{ stats.submitted }}</span>
+                    <span class="kpi-title">Submitted</span>
+                </div>
+            </div>
+
+            <div class="admin-kpi-card kpi-in-progress">
+                <div class="kpi-icon-wrapper">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="kpi-inprogress-val">{{ stats.in_progress }}</span>
+                    <span class="kpi-title">In Progress</span>
+                </div>
+            </div>
+
+            <div class="admin-kpi-card kpi-resolved">
+                <div class="kpi-icon-wrapper">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="kpi-resolved-val">{{ stats.resolved }}</span>
+                    <span class="kpi-title">Resolved</span>
+                </div>
+            </div>
+
+            <div class="admin-kpi-card kpi-closed">
+                <div class="kpi-icon-wrapper">
+                    <i class="fa-solid fa-box-archive"></i>
+                </div>
+                <div class="kpi-info">
+                    <span class="kpi-value" id="kpi-closed-val">{{ stats.closed }}</span>
+                    <span class="kpi-title">Closed</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="table-controls-card">
+            <div class="controls-header">
+                <h3><i class="fa-solid fa-filter"></i> Filter Complaints</h3>
+                <span class="records-counter">{{ complaints|length }} record(s) matching criteria</span>
+            </div>
+            <form action="{{ url_for('admin') }}" method="GET" class="filter-form" id="filterForm">
+                <div class="filter-form-grid">
+                    <div class="form-group-sm">
+                        <label for="category-filter"><i class="fa-solid fa-layer-group"></i> Department / Category</label>
+                        <select name="category" id="category-filter" class="form-control-sm">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group-sm">
+                        <label for="status-filter"><i class="fa-solid fa-traffic-light"></i> Lifecycle Status</label>
+                        <select name="status" id="status-filter" class="form-control-sm">
+                            <option value="">All Statuses</option>
+                            {% for st in statuses %}
+                                <option value="{{ st }}" {% if current_status == st %}selected{% endif %}>{{ st }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group-sm">
+                        <label for="priority-filter"><i class="fa-solid fa-flag"></i> Priority Level</label>
+                        <select name="priority" id="priority-filter" class="form-control-sm">
+                            <option value="">All Priorities</option>
+                            {% for pr in priorities %}
+                                <option value="{{ pr }}" {% if current_priority == pr %}selected{% endif %}>{{ pr }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="filter-actions-sm">
+                        <button type="submit" class="btn btn-primary btn-sm" id="btn-apply-filters">
+                            <i class="fa-solid fa-check"></i> Apply
+                        </button>
+                        <a href="{{ url_for('admin') }}" class="btn btn-outline-secondary btn-sm" id="btn-reset-filters">
+                            <i class="fa-solid fa-rotate-left"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Card -->
+        <div class="complaints-table-card">
+            <div class="table-responsive">
+                <table class="complaints-table" id="complaintsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Category</th>
+                            <th>Location</th>
+                            <th>Description</th>
+                            <th>Priority</th>
+                            <th>Created At</th>
+                            <th>Current Status</th>
+                            <th class="text-center">Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if complaints %}
+                            {% for c in complaints %}
+                                <tr>
+                                    <td class="col-id">
+                                        <a href="{{ url_for('track', complaint_id=c.id) }}" title="Inspect Ticket Details" class="id-link">
+                                            #{{ c.id }}
+                                        </a>
+                                    </td>
+                                    <td class="col-cat">
+                                        <span class="cat-pill">{{ c.category }}</span>
+                                    </td>
+                                    <td class="col-loc" title="{{ c.location }}">
+                                        <i class="fa-solid fa-location-dot loc-icon"></i> {{ c.location }}
+                                    </td>
+                                    <td class="col-desc">
+                                        <div class="desc-truncate" title="{{ c.description }}">
+                                            {{ c.description }}
+                                        </div>
+                                    </td>
+                                    <td class="col-prio">
+                                        <span class="priority-badge priority-{{ c.priority|lower }}">
+                                            {{ c.priority }}
+                                        </span>
+                                    </td>
+                                    <td class="col-date">
+                                        <span class="date-text">{{ c.created_at }}</span>
+                                    </td>
+                                    <td class="col-status">
+                                        <span class="status-badge status-{{ c.status|lower|replace(' ', '-') }}">
+                                            <span class="status-dot"></span> {{ c.status }}
+                                        </span>
+                                    </td>
+                                    <td class="col-action text-center">
+                                        <form action="{{ url_for('update_status') }}" method="POST" class="status-update-inline-form">
+                                            <input type="hidden" name="complaint_id" value="{{ c.id }}">
+                                            <div class="status-action-row">
+                                                <select name="status" class="form-select-sm" aria-label="Select new status for Complaint #{{ c.id }}">
+                                                    {% for st in statuses %}
+                                                        <option value="{{ st }}" {% if c.status == st %}selected{% endif %}>{{ st }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button type="submit" class="btn btn-update-status" title="Save Status Update">
+                                                    <i class="fa-solid fa-floppy-disk"></i> Save
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center empty-table-msg">
+                                    <div class="empty-state-box">
+                                        <i class="fa-solid fa-inbox empty-icon"></i>
+                                        <p>No complaints match the specified query.</p>
+                                        <a href="{{ url_for('admin') }}" class="btn btn-sm btn-outline-primary">View All Records</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
